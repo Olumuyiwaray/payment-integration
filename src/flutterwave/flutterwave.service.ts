@@ -102,20 +102,35 @@ export class FlutterwaveService {
       response.data.status === 'successful' ||
       response.data.status === 'pending'
     ) {
-      const transactionId = response.data.id;
-      const transaction = await this.flw.Transaction.verify({
-        id: transactionId,
-      });
-
-      if (transaction.data.status === 'successful') {
-        return 'payment-successful';
-      }
-      if (transaction.data.status === 'pending') {
-        // set up job
-        return 'payment-pending';
-      }
+      return await this.validate(response.data.id);
     }
 
     return 'payment-failed';
+  }
+
+  /**
+   * name
+   */
+  public async checkRedirect(payload: string) {
+    const transactionId: string = await this.cacheManager.get(
+      `txref-${payload}`,
+    );
+
+    return await this.validate(transactionId);
+  }
+
+  private async validate(payload: string) {
+    const transactionId = payload;
+    const transaction = await this.flw.Transaction.verify({
+      id: transactionId,
+    });
+
+    if (transaction.data.status === 'successful') {
+      return 'payment-successful';
+    }
+    if (transaction.data.status === 'pending') {
+      // set up job
+      return 'payment-pending';
+    }
   }
 }

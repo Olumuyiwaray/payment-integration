@@ -16,4 +16,8 @@ export class PaymentService {
   async vadidate(payload: Validate) {
     return this.flutterwaveService.validatePay(payload);
   }
+
+  async checkRedirect(payload: string) {
+    return this.flutterwaveService.checkRedirect(payload);
+  }
 }

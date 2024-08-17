@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Req, Res } from '@nestjs/common';
+import { Controller, Post, Body, Req, Res, Query } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { Request, Response } from 'express';
@@ -127,5 +127,24 @@ export class PaymentController {
     }
 
     return res.json({ isSucess: false, message: response });
+  }
+
+  @Post('payment-redirect')
+  async redirect(
+    @Query('status') status: string,
+    @Query('tx_ref') tx_ref: string,
+    @Res() res: Response,
+  ) {
+    if (status === 'successfull' || status === 'pending') {
+      const response = await this.paymentService.checkRedirect(tx_ref);
+      if (response === 'payment-successful') {
+        return res.json({ isSucess: true, message: response });
+      }
+
+      if (response === 'payment-pending') {
+        return res.json({ isSucess: false, message: response });
+      }
+    }
+    return res.json({ isSucess: false, message: 'payment Failed' });
   }
 }
