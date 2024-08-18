@@ -1,4 +1,12 @@
-import { Controller, Post, Body, Req, Res, Query } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Req,
+  Res,
+  Query,
+  Headers,
+} from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { Request, Response } from 'express';
@@ -146,5 +154,24 @@ export class PaymentController {
       }
     }
     return res.json({ isSucess: false, message: 'payment Failed' });
+  }
+
+  @Post('flw-webhook')
+  async webHook(
+    @Headers('verif-hash') verifHash: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const signature = process.env.FLW_SECRET_HASH;
+
+    if (!signature || signature !== verifHash) {
+      res.status(401).end();
+    }
+
+    // const payload = req.body;
+    // It's a good idea to log all received events.
+    // log(payload);
+    // Do something (that doesn't take too long) with the payload
+    res.status(200).end();
   }
 }
